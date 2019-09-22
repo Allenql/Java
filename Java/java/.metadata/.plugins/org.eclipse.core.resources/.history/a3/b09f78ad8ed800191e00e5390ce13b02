@@ -1,0 +1,165 @@
+package com.lz.schoolMS.view.student;
+
+import java.awt.BorderLayout;
+import java.awt.FlowLayout;
+import java.awt.Window;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import javax.swing.JButton;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.table.DefaultTableModel;
+
+import com.lz.schoolMS.bean.Student;
+import com.lz.schoolMS.dao.StudentDao;
+import com.lz.schoolMS.util.DateUtil;
+/**
+ * 学生信息管理界面
+ * @author Administrator
+ *
+ */
+public class StudentPanel extends JPanel {
+	private static final long serialVersionUID = 8065731521114621365L;
+	
+	JTable jt = new JTable();
+	StudentDao studentDao = new StudentDao();
+	public StudentPanel(){
+		try {
+			this.setLayout(new BorderLayout());  // 设置为边界布局
+			
+			//增 删 改  按钮
+			JPanel studentPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+			JButton addButton = new JButton("新增");
+			JButton updateButton = new JButton("修改");
+			JButton deleteButton = new JButton("删除");
+			studentPanel.add(addButton);
+			studentPanel.add(updateButton);
+			studentPanel.add(deleteButton);
+			
+			this.createStudentListTbale();
+			
+			
+			//中间部分面板使用滚动面板
+			JScrollPane jsp = new JScrollPane(jt);
+			
+			this.add(studentPanel,BorderLayout.NORTH);
+			this.add(jsp);
+			
+			//新增按钮添加事件
+			addButton.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					removeAll();
+					AddStuPanel nsf = new AddStuPanel();
+					add(nsf);
+					updateUI();
+				}
+			});
+			
+			//修改按钮
+			updateButton.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					//获得所选中行号
+					int row = jt.getSelectedRow();
+					if(row==-1){
+						JOptionPane.showMessageDialog(null, "请选中一条需要修改的学生信息", "操作提示",JOptionPane.INFORMATION_MESSAGE);
+						return;
+					}
+					//获得选中行的指定列的内容
+					int num = Integer.parseInt(String.valueOf(jt.getValueAt(row, 0)));
+					System.out.println(num);
+					removeAll();
+					UpdateStuPanel usp = new UpdateStuPanel(num);
+					add(usp);
+					updateUI();
+				}
+			});
+			
+			//删除按钮
+			deleteButton.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					try {
+						//1.验证点击删除按钮 至少选中一条信息
+						int[] arr= jt.getSelectedRows();
+						System.out.println(Arrays.toString(arr));
+						if(arr.length==0){
+							JOptionPane.showMessageDialog(null, "请至少选中一条需要删除的学生信息", "操作提示",JOptionPane.INFORMATION_MESSAGE);
+							return;
+						}
+						int i = JOptionPane.showConfirmDialog(null, "确定删除所选内容?","提示",JOptionPane.OK_CANCEL_OPTION);
+						if(i==0){
+							//获得选中行数的学号
+							String nums = "";
+							for(int row : arr){
+								nums += jt.getValueAt(row, 0)+",";
+							}
+							studentDao.deleteStudent(nums);
+							createStudentListTbale();
+						}
+					} catch (Exception e2) {
+						e2.printStackTrace();
+					}
+				}
+			});
+		} catch (Exception e) {
+			JOptionPane.showMessageDialog(null, "系统忙请稍后!", "操作提示",JOptionPane.ERROR_MESSAGE);
+			e.printStackTrace();
+		}
+	}
+	
+	
+	public void createStudentListTbale() throws ClassNotFoundException, SQLException{
+		StudentDao studentdao = new StudentDao();
+		List<Student> lstu = studentdao.findStudentList();  //所有学生信息
+		String[] columnNames = {"学号","姓名","性别","生日","电话","地址","年级","班主任","操作时间"};
+		
+		String[][] arr = new String[lstu.size()][columnNames.length];
+		
+		for(int i = 0; i<lstu.size();i++){
+			Student stu = lstu.get(i);
+			for(int j = 0; j<columnNames.length; j++){
+				if(j==0){
+					arr[i][j] = String.valueOf(stu.getNum());
+				}
+				if(j==1){
+					arr[i][j] = stu.getName();
+				}
+				if(j==2){
+					arr[i][j] = stu.getSex();
+				}
+				if(j==3){
+					arr[i][j] = DateUtil.dateToString(stu.getBirthday(), "yyyy-MM-dd");
+				}
+				if(j==4){
+					arr[i][j] = stu.getTel();
+				}
+				if(j==5){
+					arr[i][j] = stu.getAddress();
+				}
+				if(j==6){
+					arr[i][j] = stu.getGradeName();
+				}
+				if(j==7){
+					arr[i][j] = stu.getTeacheName();
+				}
+				if(j==8){
+					arr[i][j] = DateUtil.dateToString(stu.getOperTime(), "yyyy-MM-dd HH:mm:ss");
+				}
+			}
+		}
+		
+		DefaultTableModel dt = new DefaultTableModel(arr, columnNames); // 封装表格数据
+		jt.setModel(dt);
+		
+	}
+	
+}

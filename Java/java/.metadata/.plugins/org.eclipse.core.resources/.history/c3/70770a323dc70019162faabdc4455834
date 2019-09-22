@@ -1,0 +1,7 @@
+package practice_API;
+/*
+ * 去除字符串两端空格和中间空格
+ */
+public class Practice1 {
+
+}

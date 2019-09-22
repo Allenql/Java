@@ -1,0 +1,47 @@
+package com.lz.schoolMS.util;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+public class JDBCUtil {
+	
+	static String url = "jdbc:mysql://127.0.0.1:3306/school_db?characterEncoding=utf-8";
+	static String userName = "root";
+	static String password= "111111";
+	static PreparedStatement pst;
+	
+	static{
+		try {
+			Class.forName("com.mysql.jdbc.Driver");
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+			throw new RuntimeException();
+		}
+	}
+	/**
+	 * 向dao层方法中提供Connection
+	 * @return
+	 * @throws SQLException
+	 */
+	public static Connection getConnection() throws SQLException{
+		Connection getConnection = DriverManager.getConnection(url, userName, password);
+		return getConnection;
+	}
+	
+	
+	public static void executeUpdateSql(String sql,Object[] obj,Connection connection) throws SQLException{
+		pst  = connection.prepareStatement(sql);
+		if(obj!=null){
+			for(int i = 0;i<obj.length;i++){
+				pst.setObject(i+1, obj[i]);
+			}
+		}
+		pst.executeQuery();
+	}
+
+	
+
+}

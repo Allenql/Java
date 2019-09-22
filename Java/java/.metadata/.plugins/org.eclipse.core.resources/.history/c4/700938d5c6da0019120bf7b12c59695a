@@ -1,0 +1,120 @@
+package com.lz.schoolMS.view.teacher;
+
+import java.awt.BorderLayout;
+import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.sql.SQLException;
+import java.util.List;
+
+import javax.swing.JButton;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.table.DefaultTableModel;
+
+import com.lz.schoolMS.bean.Teacher;
+import com.lz.schoolMS.dao.TeacherDao;
+import com.lz.schoolMS.util.DateUtil;
+
+public class TeacherPanel extends JPanel {
+	
+	private static final long serialVersionUID = -4557020624913422715L;
+	JTable jt = new JTable();
+	public TeacherPanel(){
+		try {
+			this.setLayout(new BorderLayout());
+			
+			// 操作按钮  新增  修改  删除
+			JPanel teacherPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+			JButton addButton = new JButton("新增");
+			JButton updateButton = new JButton("修改");
+			JButton deleteButton = new JButton("删除");
+			teacherPanel.add(addButton);
+			teacherPanel.add(updateButton);
+			teacherPanel.add(deleteButton);
+			
+			this.createTeacherListTbale();
+			
+			//中间部分面板使用滚动面板
+			JScrollPane jsp = new JScrollPane(jt);
+			this.add(teacherPanel,BorderLayout.NORTH);
+			this.add(jsp);
+			
+			//给新增按钮添加事件
+			addButton.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					removeAll();
+					add(new AddTeaPanel());
+					updateUI();
+				}
+			});
+			//修改按钮
+			updateButton.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					int row = jt.getSelectedRowCount();
+					System.out.println(jt.getSelectedRowCount());
+					if(row != 1){
+						JOptionPane.showMessageDialog(null, "请选中一条需要修改的教师信息", "操作提示",JOptionPane.INFORMATION_MESSAGE);
+						return;
+					}
+					//获得选中行的指定列的内容
+					int num = Integer.parseInt(String.valueOf(jt.getValueAt(row, 0)));
+//					UpdateTeaPanel updateTeaPanel = new UpdateTeaPanel(int num);
+//					jt.add(updateTeaPanel);
+					updateUI();
+				}
+			});
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void createTeacherListTbale() throws ClassNotFoundException, SQLException{
+		TeacherDao teacherDao = new TeacherDao();
+		List<Teacher> ltea = teacherDao.findTeacherList();
+		String[] columnNames = {"工号","姓名","性别","生日","电话","地址","年级","科目","操作时间"};
+		
+		String[][] arr = new String[ltea.size()][columnNames.length];
+		for(int i = 0;i<ltea.size();i++){
+			Teacher tea = ltea.get(i);
+			for(int j = 0;j<columnNames.length;j++){
+				if(j==0){
+					arr[i][j] = String.valueOf(tea.getNum());
+				}
+				if(j==1){
+					arr[i][j] = tea.getName();
+				}
+				if(j==2){
+					arr[i][j] = tea.getSex();
+				}
+				if(j==3){
+					arr[i][j] = DateUtil.dateToString(tea.getBirthday(), "yyyy-MM-dd");
+				}
+				if(j==4){
+					arr[i][j] = tea.getTel();
+				}
+				if(j==5){
+					arr[i][j] = tea.getAddress();
+				}
+				if(j==6){
+					arr[i][j] = tea.getGradeName();
+				}
+				if(j==7){
+					arr[i][j] = tea.getCourseName();
+				}
+				if(j==8){
+					arr[i][j] = DateUtil.dateToString(tea.getOperTime(), "yyyy-MM-dd HH:mm:ss");
+				}
+			}
+		}
+		DefaultTableModel df = new DefaultTableModel(arr,columnNames);  // 封装表格数据  
+		jt.setModel(df);
+		
+	}
+	
+
+}

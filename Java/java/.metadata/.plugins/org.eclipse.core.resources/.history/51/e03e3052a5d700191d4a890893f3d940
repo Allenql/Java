@@ -1,0 +1,41 @@
+package com.lz.schoolMS.view.teacher;
+
+import java.awt.BorderLayout;
+import java.awt.FlowLayout;
+
+import javax.swing.JButton;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.table.DefaultTableModel;
+
+public class TeacherPanel extends JPanel {
+	
+	private static final long serialVersionUID = -4557020624913422715L;
+
+	public TeacherPanel(){
+		this.setLayout(new BorderLayout());
+		
+		// 操作按钮  新增  修改  删除
+		JPanel teacherPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		JButton addButton = new JButton("新增");
+		JButton updateButton = new JButton("修改");
+		JButton deleteButton = new JButton("删除");
+		teacherPanel.add(addButton);
+		teacherPanel.add(updateButton);
+		teacherPanel.add(deleteButton);
+		
+		//表格
+		JTable jt = new JTable();
+		String[] columnPswd = {"工号","姓名","性别","生日"};
+		String[][] arr = {{"2001","赵","男","1974-10-23"},{"2001","赵","男","1974-10-23"},};
+		DefaultTableModel df = new DefaultTableModel(arr,columnPswd);  // 封装表格数据  
+		jt.setModel(df);
+		
+		//中间部分面板使用滚动面板
+		JScrollPane jsp = new JScrollPane(jt);
+		this.add(teacherPanel,BorderLayout.NORTH);
+		this.add(jsp);
+	}
+
+}

@@ -1,0 +1,252 @@
+package com.lz.schoolMS.dao;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+
+
+
+
+
+
+
+
+
+
+
+
+import com.lz.schoolMS.bean.Teacher;
+
+public class TeacherDao {
+	//查询所有教师信息
+	public List<Teacher> findTeacherList() throws ClassNotFoundException, SQLException{
+		Connection conn = null;
+		PreparedStatement pst = null;
+		ResultSet rs = null;
+		List<Teacher> list = new ArrayList<Teacher>();
+		try {
+			Class.forName("com.mysql.jdbc.Driver");
+			conn = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/school_db?characterEncoding=utf8", "root", "111111");
+			StringBuffer sb = new StringBuffer();
+			sb.append("SELECT tt.num, tt.name teachername, tt.sex, "
+					+ " tt.birthday, tt.tel, tt.address, tt.optertime, tg.name gradename, tc.name coursename "
+					+ " FROM t_teacher tt"
+					+ " LEFT JOIN t_grade tg ON tt.grade = tg.id"
+					+ " LEFT JOIN t_course tc ON tt.course = tc.id");
+			pst = conn.prepareStatement(new String(sb));
+			
+			rs = pst.executeQuery();
+			while(rs.next()){
+				Teacher teacher = new Teacher();
+				teacher.setNum(rs.getInt("num"));
+				teacher.setName(rs.getString("teachername"));
+				teacher.setSex(rs.getString("sex"));
+				teacher.setBirthday(rs.getDate("birthday"));
+				teacher.setTel(rs.getString("tel"));
+				teacher.setAddress(rs.getString("address"));
+				teacher.setOperTime(rs.getTimestamp("optertime"));
+				teacher.setGradeName(rs.getString("gradeName"));
+				teacher.setCourseName(rs.getString("courseName"));
+				list.add(teacher);
+ 			}
+		} finally{
+			if(conn!=null){
+				conn.close();
+			}
+			if(pst!=null){
+				pst.close();
+			}
+			if(rs!=null){
+				rs.close();
+			}
+		}
+		return list;
+	}
+	
+	//获取数据库中年级信息
+	public String[] findGradeList() throws ClassNotFoundException, SQLException {
+		Connection conn = null;
+		PreparedStatement pst = null;
+		ResultSet rs = null;
+		List<String> list = new ArrayList<String>();
+		try {
+			Class.forName("com.mysql.jdbc.Driver");
+			conn = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/school_db?characterEncoding=utf8", "root", "111111");
+			pst = conn.prepareStatement("SELECT CONCAT(id,':',NAME)name FROM t_grade");
+			rs = pst.executeQuery();
+			while(rs.next()){
+				list.add(rs.getString("name"));
+			}
+			String[] arr = list.toArray(new String[list.size()]);
+			return arr;
+		} finally{
+			if(conn!=null){
+				conn.close();
+			}
+			if(pst!=null){
+				pst.close();
+			}
+			if(rs!=null){
+				rs.close();
+			}
+		}
+	}
+	
+	//获取数据库中科目信息
+	public String[] findCourseList() throws ClassNotFoundException, SQLException {
+		Connection conn = null;
+		PreparedStatement pst = null;
+		ResultSet rs = null;
+		List<String> list = new ArrayList<String>();
+		try {
+			Class.forName("com.mysql.jdbc.Driver");
+			conn = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/school_db?characterEncoding=utf8", "root", "111111");
+			pst = conn.prepareStatement("SELECT CONCAT(id,':',NAME)name FROM t_course");
+			rs = pst.executeQuery();
+			while(rs.next()){
+				list.add(rs.getString("name"));
+			}
+			String[] arr = list.toArray(new String[list.size()]);
+			return arr;
+		} finally{
+			if(conn!=null){
+				conn.close();
+			}
+			if(pst!=null){
+				pst.close();
+			}
+			if(rs!=null){
+				rs.close();
+			}
+		}
+	}
+	
+	//验证工号是否存在
+	public Boolean checkTeacherNum(String num) throws ClassNotFoundException, SQLException {
+		Connection conn = null;
+		PreparedStatement pst = null;
+		ResultSet rs = null;
+		List<String> list = new ArrayList<String>();
+		try {
+			Class.forName("com.mysql.jdbc.Driver");
+			conn = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/school_db?characterEncoding=utf8", "root", "111111");
+			pst = conn.prepareStatement("SELECT num FROM t_teacher WHERE num = ?");
+			pst.setString(1, num);
+			rs = pst.executeQuery();
+			while(rs.next()){
+				return true;
+			}
+		} finally{
+			if(conn!=null){
+				conn.close();
+			}
+			if(pst!=null){
+				pst.close();
+			}
+			if(rs!=null){
+				rs.close();
+			}
+		}
+		return false;
+	}
+
+	//新增教师信息
+	public void addteacher(String num, String name, String sex,
+			String birthday, String tel, String address, String grade,
+			String course) throws ClassNotFoundException, SQLException {
+		Connection conn = null;
+		PreparedStatement pst = null;
+		try {
+			Class.forName("com.mysql.jdbc.Driver");
+			conn = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/school_db?characterEncoding=utf8", "root", "111111");
+			pst = conn.prepareStatement("insert into t_teacher(num,password,name,sex,birthday,tel,address,grade,course)"
+									+ "values(?,?,?,?,?,?,?,?,?)");
+			pst.setString(1, num);
+			pst.setString(2, "111");
+			pst.setString(3, name);
+			pst.setString(4, sex);
+			pst.setString(5, birthday);
+			pst.setString(6, tel);
+			pst.setString(7, address);
+			pst.setString(8, grade);
+			pst.setString(9, course);
+			pst.executeUpdate();
+			
+		} finally{
+			if(conn!=null){
+				conn.close();
+			}
+			if(pst!=null){
+				pst.close();
+			}
+		}
+	}
+
+	//根据工号查询学生信息
+	public Teacher findTeacherByNum(int i) throws ClassNotFoundException, SQLException {
+		Connection conn = null;
+		PreparedStatement pst = null;
+		ResultSet rs = null;
+		Teacher teacher = new Teacher();;
+		try {
+			Class.forName("com.mysql.jdbc.Driver");
+			conn = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/school_db?characterEncoding=utf8", "root", "111111");
+			
+			pst = conn.prepareStatement("select num,name,sex,birthday,tel,address,grade,course"
+					+ " from t_teacher where num="+i);
+			
+			rs = pst.executeQuery();
+			while(rs.next()){
+				teacher.setNum(rs.getInt("num"));
+				teacher.setName(rs.getString("name"));
+				teacher.setSex(rs.getString("sex"));
+				teacher.setBirthday(rs.getDate("birthday"));
+				teacher.setTel(rs.getString("tel"));
+				teacher.setAddress(rs.getString("address"));
+				teacher.setGradeName(rs.getString("grade"));
+				teacher.setCourseName(rs.getString("course"));
+ 			}
+		} finally{
+			if(conn!=null){
+				conn.close();
+			}
+			if(pst!=null){
+				pst.close();
+			}
+			if(rs!=null){
+				rs.close();
+			}
+		}
+		return teacher;
+	}
+
+	//删除教师信息
+	public void deleteTeacher(StringBuffer num) throws ClassNotFoundException, SQLException {
+		Connection conn = null;
+		PreparedStatement pst = null;
+		try {
+			Class.forName("com.mysql.jdbc.Driver");
+			conn = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/school_db?characterEncoding=utf8", "root", "111111");
+			pst = conn.prepareStatement("delete from t_teacher where num in(?)");
+			System.out.println(num.toString());
+			pst.setString(1, num.toString());
+			pst.executeUpdate();
+			
+		} finally{
+			if(conn!=null){
+				conn.close();
+			}
+			if(pst!=null){
+				pst.close();
+			}
+		}
+	}
+	
+	
+	
+
+}

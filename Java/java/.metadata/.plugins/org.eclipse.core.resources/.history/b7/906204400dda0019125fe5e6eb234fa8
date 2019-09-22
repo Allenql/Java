@@ -1,0 +1,30 @@
+package com.lz.schoolMS.ds;
+
+public class LinkList {
+	private Node head;
+	private int length;
+	
+	public void add(int data){
+		Node n = new Node(data);
+		if(head == null){
+			head = n;
+			length++;
+			return;
+		}
+		Node tmp = head;
+		while(tmp.next != null){
+			tmp = tmp.next;
+		}
+		tmp.next = n;
+		length++;
+	}
+	
+	public int size(){
+		return length;
+	}
+	
+	public int getFirst(){
+		return this.head.data;
+	}
+
+}

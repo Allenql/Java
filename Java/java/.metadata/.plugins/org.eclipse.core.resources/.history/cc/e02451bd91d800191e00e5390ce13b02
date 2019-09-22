@@ -1,0 +1,211 @@
+package com.lz.schoolMS.view.student;
+
+import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import javax.swing.ButtonGroup;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JRadioButton;
+import javax.swing.JTextField;
+
+import com.lz.schoolMS.bean.Student;
+import com.lz.schoolMS.dao.StudentDao;
+import com.lz.schoolMS.util.DateUtil;
+
+/**
+ * 修改学生信息界面
+ * @author Administrator
+ *
+ */
+public class UpdateStuPanel extends JPanel {
+	
+	private static final long serialVersionUID = -1589334182232045457L;
+	String num;
+	String name;
+	String sex;
+	String birthday;
+	JRadioButton manButton;
+	JRadioButton womanButton;
+	String tel;
+	String address;
+	String grade;
+	String teacher;
+	JTextField numText;
+	JTextField studentNameText;
+	JTextField birthdayText;
+	JTextField telText;
+	JTextField addressText;
+	JComboBox<String> gradeBox;
+	JComboBox<String> teacherBox;
+	JButton okButton;
+	StudentDao studentDao = new StudentDao();
+	public UpdateStuPanel(int i){
+		try {
+			//根据学号查询学生信息
+			Student student = studentDao.findStudentByNum(i);
+			this.setLayout(new GridLayout(10,1));
+			
+			//修改学生信息
+			JPanel registPanel = new JPanel();
+			JLabel registLable = new JLabel("修改学生信息");
+			registLable.setFont(new Font("黑体", Font.BOLD, 30));
+			registPanel.add(registLable);
+			//学号
+			JPanel numPanel = new JPanel();
+			JLabel numLable = new JLabel("学号");
+			numText = new JTextField(15);
+			numText.setText(String.valueOf(student.getNum()));
+			numText.setEditable(false);
+			numPanel.add(numLable);
+			numPanel.add(numText);
+			
+			//姓名
+			JPanel studentNamePanel = new JPanel();
+			JLabel studentNameLable = new JLabel("姓名");
+			studentNameText = new JTextField(15);
+			studentNameText.setText(student.getName());
+			studentNamePanel.add(studentNameLable);
+			studentNamePanel.add(studentNameText);
+			
+			//性别
+			JPanel sexPanel = new JPanel(new FlowLayout(FlowLayout.CENTER,45,0));
+			JLabel sexLable = new JLabel("性别");
+			sexPanel.add(sexLable);
+			manButton = new JRadioButton("男");
+			womanButton = new JRadioButton("女");
+			ButtonGroup sexGroup = new ButtonGroup();
+			sexGroup.add(womanButton);
+			sexGroup.add(manButton);
+			sexPanel.add(manButton);
+			sexPanel.add(womanButton);
+			if(student.getSex().equals("男")){
+				manButton.setSelected(true);
+			}else{
+				womanButton.setSelected(true);
+			}
+			
+			//生日
+			JPanel birthdayPanel = new JPanel();
+			JLabel birthdayLable = new JLabel("生日");
+			birthdayPanel.add(birthdayLable);
+			birthdayText = new JTextField(15);
+			birthdayText.setText(DateUtil.dateToString(student.getBirthday(), "yyyy-MM-dd"));
+			birthdayPanel.add(birthdayText);
+			
+			//电话
+			JPanel telPanel = new JPanel();
+			JLabel telLable = new JLabel("电话");
+			telText = new JTextField(15);
+			telText.setText(student.getTel());
+			telPanel.add(telLable);
+			telPanel.add(telText);
+			
+			//地址
+			JPanel addressPanel = new JPanel();
+			JLabel addressLable = new JLabel("地址");
+			addressText = new JTextField(15);
+			addressText.setText(student.getAddress());
+			addressPanel.add(addressLable);
+			addressPanel.add(addressText);
+			
+			//年级
+			JPanel gradePanel = new JPanel();
+			JLabel gradeLable = new JLabel("年级");
+			gradePanel.add(gradeLable);
+			String[] gradeArr = studentDao.findGradeList();
+			gradeBox = new JComboBox<String>(gradeArr);
+			gradePanel.add(gradeBox);
+			for(String g : gradeArr){
+				String gid = g.substring(0, g.indexOf(":"));
+				if(Integer.parseInt(gid)==student.getGradeId()){
+					//gradeBox.setSelectedItem("6:六年级");
+					System.out.println(gradeBox.getSelectedItem() + "----");
+				}
+			}
+			
+			//班主任
+			JPanel teacherPanel = new JPanel();
+			JLabel teacherLable = new JLabel("班主任");
+			teacherPanel.add(teacherLable);
+			String[] teacherArr = studentDao.findTeacherList();
+			teacherBox = new JComboBox<String>(teacherArr);
+			teacherPanel.add(teacherBox);
+			for(String t : gradeArr){
+				String gid = t.substring(0, t.indexOf(":"));
+				if(Integer.parseInt(gid)==student.getTeacheId()){
+					gradeBox.setSelectedItem(t);
+				}
+			}
+			
+			//修改按钮
+			JPanel okPanel = new JPanel();
+			okButton = new JButton("修改");
+			okPanel.add(okButton);
+			
+			this.add(registPanel);
+			this.add(numPanel);
+			this.add(studentNamePanel);
+			this.add(sexPanel);
+			this.add(birthdayPanel);
+			this.add(telPanel);
+			this.add(addressPanel);
+			this.add(gradePanel);
+			this.add(teacherPanel);
+			this.add(okPanel);
+			this.setVisible(true); // 设置窗口可见  代码位于最下面
+		} catch (Exception e) {
+			JOptionPane.showMessageDialog(null, "失败","提示",JOptionPane.WARNING_MESSAGE);
+			e.printStackTrace();
+		}
+		
+		//给注册按钮添加事件
+		okButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				try {
+					num = numText.getText();
+					name = studentNameText.getText();
+					birthday = birthdayText.getText();
+					tel = telText.getText();
+					address = addressText.getText();
+					grade = ((String) gradeBox.getSelectedItem()).substring(0,1);
+					teacher = ((String) teacherBox.getSelectedItem()).substring(0,1);;
+					
+					if(!(name.length()>1&&name.length()<=10)){
+						JOptionPane.showMessageDialog(null, "姓名长度应在2~10之间","提示",JOptionPane.WARNING_MESSAGE);
+						return;
+					}
+					if(birthday.length()==0){
+						JOptionPane.showMessageDialog(null, "请输入生日","提示",JOptionPane.WARNING_MESSAGE);
+						return;
+					}if(!(tel.matches("1[3,5,8]\\d{9}"))){
+						JOptionPane.showMessageDialog(null, "请输入正确格式手机号","提示",JOptionPane.WARNING_MESSAGE);
+						return;
+					}
+					if(!(address.length()>0&&address.length()<30)){
+						JOptionPane.showMessageDialog(null, "请输入地址(1~30字)","提示",JOptionPane.WARNING_MESSAGE);
+						return;
+					}
+					String sex = null;
+					if(manButton.isSelected()){
+						sex = "男";
+					}else{
+						sex = "女";
+					}
+					studentDao.Updatestudent(num,name,sex,birthday,tel,address,grade,teacher);
+					JOptionPane.showMessageDialog(null, "操作成功    ","提示",JOptionPane.WARNING_MESSAGE);
+					okButton.setEnabled(false);
+				} catch (Exception e2) {
+					e2.printStackTrace();
+				}
+			}
+		});
+	}  
+}
